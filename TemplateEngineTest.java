@@ -8,12 +8,14 @@ import st.TemplateEngine;
 public class TemplateEngineTest {
 
     private EntryMap map;
+    private EntryMap map2;
 
     private TemplateEngine engine;
 
     @Before
     public void setUp() throws Exception {
         map = new EntryMap();
+        map2 = new EntryMap();
         engine = new TemplateEngine();
     }
 
@@ -122,21 +124,81 @@ public class TemplateEngineTest {
 	}
 	
 	/*
-		spec4 - Templates in a template string occur between "${" and "}". In a template, everything between its boundaries ("${" and "}") is treated as normal text when matched against an entry.
-            ---> In the template string "Hello ${name}, could you please give me your ${item} ?" the two templates are:
-                1 - ${name}
-                2 - ${item}
-            ---> The text of each template that will be matched against the EntryMap stored entries are:
-                1 - "name"
-                2 - "item"
-                (i.e. the template boundaries are omitted)
+		spec4 - Templates in a template string occur between "${" and "}". 
+			In a template, everything between its boundaries ("${" and "}") 
+			is treated as normal text when matched against an entry.
+            ---> In the template string "Hello ${name}, could you please 
+				give me your ${item} ?" the two templates are:
+					1 - ${name}
+					2 - ${item}
+            ---> The text of each template that will be matched against 
+				the EntryMap stored entries are:
+					1 - "name"
+					2 - "item"
+					(i.e. the template boundaries are omitted)
     */
+	@Test
+	public void testMalformedTemplateGapAfterDollar() {
+		map.store("fname", "Rose", false);
+		map.store("lname", "Tyler", false);
+		
+		String result = engine.evaluate("Hey there $ {fname} ${lname}", map, "delete-unmatched");
+		assertEquals("Hey there $ {fname} Tyler", result);
+	}
+	
+	@Test
+	public void testMalformedTemplateOpenWOClose() {
+		map.store("fname", "Rose", false);
+		map.store("lname", "Tyler", false);
+		
+		String result = engine.evaluate("Hey there ${fname ${lname}", map, "delete-unmatched");
+		assertEquals("Hey there ${fname Tyler", result);
+		
+		map2.store("fname", "Rose", false);
+		map2.store("lname", "Tyler", false);
+		
+		result = engine.evaluate("Hey there ${fname} ${lname", map2, "delete-unmatched");
+		assertEquals("Hey there Rose ${lname", result);
+	}
+	
+	@Test
+	public void testMalformedTemplateCloseWOOpen() {
+		map.store("fname", "Rose", false);
+		map.store("lname", "Tyler", false);
+		
+		String result = engine.evaluate("Hey there fname} ${lname}", map, "delete-unmatched");
+		assertEquals("Hey there fname} Tyler", result);
+		
+		map2.store("fname", "Rose", false);
+		map2.store("lname", "Tyler", false);
+		
+		result = engine.evaluate("Hey there ${fname} lname}", map2, "delete-unmatched");
+		assertEquals("Hey there Rose lname}", result);
+	}
+	
+	@Test
+	public void testMalformedTemplateBackards() {
+		map.store("fname", "Rose", false);
+		map.store("lname", "Tyler", false);
+		
+		String result = engine.evaluate("Hey there $}fname} ${lname{", map, "delete-unmatched");
+		assertEquals("Hey there $}fname} ${lname{", result);
+		
+		map2.store("fname", "Rose", false);
+		map2.store("lname", "Tyler", false);
+		
+		result = engine.evaluate("Hey there {$fname} }lname${", map2, "delete-unmatched");
+		assertEquals("Hey there {$fname} }lname${", result);
+	}
+	
 	/*
-		spec5 - When a template is matched against an entry key, any non visible character does not affect the result.
-            ---> The entry "middle name"/"Peter" will match all of the following templates:
-                1 - ${middle name}
-                2 - ${middlename}
-                3 - ${middle       name}
+		spec5 - When a template is matched against an entry key, any 
+			non visible character does not affect the result.
+            ---> The entry "middle name"/"Peter" will match all of the 
+				following templates:
+					1 - ${middle name}
+					2 - ${middlename}
+					3 - ${middle       name}
     */
 	/*
 		spec6 - In a template string every "${" and "}" occurrence acts as a boundary of at MOST one template.

@@ -230,15 +230,80 @@ public class TemplateEngineTest {
 		assertEquals("The best ships in the universe: the TARDIS, the Enterprise, and the Millennium Falcon", result);
 	}
 	
+	@Test
+	public void testWhitespaceNoneInOriginalWord() {
+		map.store("firstname", "Rose", false);
+		map.store("last name", "Tyler", false);
+		
+		String result = engine.evaluate("Hey there ${first name} ${lastname}", map, "delete-unmatched");
+		assertEquals("Hey there Rose Tyler", result);
+	}
 	
 	/*
-		spec6 - In a template string every "${" and "}" occurrence acts as a boundary of at MOST one template.
-            ---> Processing from left-to-right, each "}" occurrence that is not already a boundary to a template is matched to its closest preceding "${" occurrence which also is not already a boundary to a template.
-            ---> In the template string "I heard that }: ${name} said: ${we should try or best for winning the ${competition} cup.}" the templates are:
-                1 - ${name}
-                2 - ${competition}
-                3 - ${we should try or best for winning the ${competition} cup.}
+		spec6 - In a template string every "${" and "}" occurrence acts as 
+			a boundary of at MOST one template.
+            ---> Processing from left-to-right, each "}" occurrence that is 
+				not already a boundary to a template is matched to its 
+				closest preceding "${" occurrence which also is not already 
+				a boundary to a template.
+            ---> In the template string "I heard that }: ${name} said: ${we 
+				should try or best for winning the ${competition} cup.}" the 
+				templates are:
+					1 - ${name}
+					2 - ${competition}
+					3 - ${we should try or best for winning the ${competition} cup.}
     */
+	@Test
+	public void testNestingMultipleCloses() {
+		map.store("fname", "Rose", false);
+		map.store("lname", "Tyler", false);
+		
+		String result = engine.evaluate("Hey there ${fname}} ${lname}}}}}}}", map, "delete-unmatched");
+		assertEquals("Hey there Rose} Tyler}}}}}}", result);
+		
+		map2.store("fname", "Rose", false);
+		map2.store("lname", "Tyler", false);
+		
+		result = engine.evaluate("Hey there ${fname}} ${lname}}}}}}}", map2, "keep-unmatched");
+		assertEquals("Hey there Rose} Tyler}}}}}}", result);
+	}
+	
+	@Test
+	public void testNestingMultipleOpenings() {
+		map.store("fname", "Rose", false);
+		map.store("lname", "Tyler", false);
+		
+		String result = engine.evaluate("Hey there ${${fname} ${${${lname} ${", map, "delete-unmatched");
+		assertEquals("Hey there ${Rose ${${Tyler ${", result);
+		
+		map2.store("fname", "Rose", false);
+		map2.store("lname", "Tyler", false);
+		
+		result = engine.evaluate("Hey there ${${fname} ${${${lname} ${", map2, "keep-unmatched");
+		assertEquals("Hey there ${Rose ${${Tyler ${", result);
+	}
+	
+	@Test
+	public void testNestingTemplatesDept() {
+		map.store("system", "metric", false);
+		map.store("metric", "cm", false);
+		map.store("length cm", "30cm", false);
+		map.store("length in", "12in", false);
+		
+		String result = engine.evaluate("Here is a ${length ${${system}}} ruler", map, "delete-unmatched");
+		assertEquals("Here is a 30cm ruler", result);
+	}
+	
+	@Test
+	public void testNestingMultipleTemplates() {
+		map.store("rank", "Doctor", false);
+		map.store("question", "Who", false);
+		map.store("Doctor Who", "the Doctor", false);
+		
+		String result = engine.evaluate("His name is ${${rank}${question}}", map, "delete-unmatched");
+		assertEquals("His name is the Doctor", result);
+	}
+	
 	/*
 		spec7 - In a template string the different templates are ordered according to their length. The shorter templates precede.
             ---> In the case of same-length templates, the one that occurs first when traversing the template string from left-to-right precedes.

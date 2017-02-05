@@ -1,0 +1,2 @@
+javac -cp .:ST_Coursework.jar:/usr/share/java/junit4.jar TemplateEngineTest.java
+java -cp .:ST_Coursework.jar:/usr/share/java/junit4.jar org.junit.runner.JUnitCore TemplateEngineTest

@@ -200,6 +200,37 @@ public class TemplateEngineTest {
 					2 - ${middlename}
 					3 - ${middle       name}
     */
+	@Test
+	public void testWhitespaceLocationMiddle() {
+		map.store("Doctor Who", "TARDIS", false);
+		map.store("Star Trek", "Enterprise", false);
+		map.store("Star Wars", "Millennium Falcon", false);
+		
+		String result = engine.evaluate("The best ships in the universe: the ${Doctor Who}, the ${StarTrek}, and the ${Star     Wars}", map, "delete-unmatched");
+		assertEquals("The best ships in the universe: the TARDIS, the Enterprise, and the Millennium Falcon", result);
+	}
+	
+	@Test
+	public void testWhitespaceLocationEnds() {
+		map.store("Doctor Who", "TARDIS", false);
+		map.store("Star Trek", "Enterprise", false);
+		map.store("Star Wars", "Millennium Falcon", false);
+		
+		String result = engine.evaluate("The best ships in the universe: the ${   Doctor Who}, the ${Star Trek   }, and the ${    Star Wars    }", map, "delete-unmatched");
+		assertEquals("The best ships in the universe: the TARDIS, the Enterprise, and the Millennium Falcon", result);
+	}
+	
+	@Test
+	public void testWhitespaceType() {
+		map.store("Doctor Who", "TARDIS", false);
+		map.store("Star Trek", "Enterprise", false);
+		map.store("Star Wars", "Millennium Falcon", false);
+		
+		String result = engine.evaluate("The best ships in the universe: the ${Doctor\tWho}, the ${Star\nTrek}, and the ${Star\r\nWars}", map, "delete-unmatched");
+		assertEquals("The best ships in the universe: the TARDIS, the Enterprise, and the Millennium Falcon", result);
+	}
+	
+	
 	/*
 		spec6 - In a template string every "${" and "}" occurrence acts as a boundary of at MOST one template.
             ---> Processing from left-to-right, each "}" occurrence that is not already a boundary to a template is matched to its closest preceding "${" occurrence which also is not already a boundary to a template.

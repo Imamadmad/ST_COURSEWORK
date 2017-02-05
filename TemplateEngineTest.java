@@ -305,25 +305,106 @@ public class TemplateEngineTest {
 	}
 	
 	/*
-		spec7 - In a template string the different templates are ordered according to their length. The shorter templates precede.
-            ---> In the case of same-length templates, the one that occurs first when traversing the template string from left-to-right precedes.
-            ---> In the template string "abc}${de}${fgijk${lm}nopqr}${s}uvw${xyz" the sorted templates are:
-                1 - ${s}
-                2 - ${de}
-                3 - ${lm}
-                4 - ${fgijk${lm}nopqr}
+		spec7 - In a template string the different templates are ordered 
+			according to their length. The shorter templates precede.
+            ---> In the case of same-length templates, the one that occurs 
+				first when traversing the template string from left-to-right
+				precedes.
+            ---> In the template string 
+				"abc}${de}${fgijk${lm}nopqr}${s}uvw${xyz" the sorted 
+				templates are:
+					1 - ${s}
+					2 - ${de}
+					3 - ${lm}
+					4 - ${fgijk${lm}nopqr}
     */
+	
+	// NOTE; I don't really know how to test this one, and I suspect this
+	//		 is wrong, so please help suggest a better way #TODO
+	@Test
+	public void testTemplateOrderPureLength() {
+		map.store("template", "Give me ${subtemplate}!", false);
+		map.store("subtemplate", "5", false);
+		
+		String result = engine.evaluate("${template}", map, "delete-unmatched");
+		assertEquals("Give me 5!", result);
+		
+		map2.store("really long template name", "Give me ${subtemplate}!", false);
+		map2.store("subtemplate", "5", false);
+		
+		result = engine.evaluate("${really long template name}", map2, "delete-unmatched");
+		assertEquals("Give me ${subtemplate}!", result);
+	}
+	
+	@Test
+	public void testTemplateOrderWithEqualLengths() {
+		
+	}
+	
 	/*
-		spec8 - The engine processes one template at a time and attempts to match it against the keys of the EntryMap entries until there is a match or the entry list is exhausted.
-            ---> The engine processes both templates and entries according to their order.
+		spec8 - The engine processes one template at a time and attempts to 
+			match it against the keys of the EntryMap entries until there 
+			is a match or the entry list is exhausted.
+            ---> The engine processes both templates and entries according 
+				to their order.
             ---> If there is a match:
-                    1 - The template (including its boundaries) in the template string is replaced by the value of the matched entry.
-                    2 - The same replace happens to all other templates which include the replaced template.
-                    3 - The template engine moves on to the next template and repeats.
-            ---> If the entry list is exhausted and no match found for the current template:
-                    1 - The template engine just moves on to the next template if matching the mode is "keep-unmatched".
-                    2 - The engine deletes the unmatched template from the template string and all other templates which include it.
-
+                    1 - The template (including its boundaries) in the 
+						template string is replaced by the value of the 
+						matched entry.
+                    2 - The same replace happens to all other templates 
+						which include the replaced template.
+                    3 - The template engine moves on to the next template 
+						and repeats.
+            ---> If the entry list is exhausted and no match found for the 
+				current template:
+                    1 - The template engine just moves on to the next 
+						template if matching the mode is "keep-unmatched".
+                    2 - The engine deletes the unmatched template from the 
+						template string and all other templates which 
+						include it.
 	*/
+	@Test
+	public void testOrderAddToMapDiffersFromOrderInTemplateString() {
+		map.store("one", "1", false);
+		map.store("two", "2", false);
+		map.store("three", "3", false);
+		
+		String result = engine.evaluate("${three} ${two} ${one}", map, "delete-unmatched");
+		assertEquals("3 2 1", result);
+	}
+	
+	//TODO: Discuss expected output of these two situations
+	@Test
+	public void testTemplateCalledMultipleTimes() {
+		map.store("thing", "test", false);
+		map.store("action", "test", false);
+		
+		String result = engine.evaluate("Yo dawg! I heard you liked ${thing}s, so I put a ${thing} in your ${thing} so you can ${action} while you ${action}", map, "delete-unmatched");
+		assertEquals("Yo dawg! I heard you liked tests, so I put a test in your test so you can test while you test", result);
+	}
+	
+	@Test
+	public void testMultipleEntriesTheSame() {
+		map.store("colour", "blue", false);
+		map.store("thing", "house", false);
+		map.store("thing", "window", false);
+		map.store("thing", "streets", false);
+		map.store("thing", "trees", false);
+		map.store("thing", "girlfriend", false);
+		
+		String result = engine.evaluate("I have a ${colour} ${thing} with a ${colour} ${thing}. ${colour} are the ${thing} and now the ${thing} are too.  I have a ${thing}, and she is so ${colour}", map, "delete-unmatched");
+		assertEquals("I have a blue house with a blue window. blue are the streets and now the trees are too.  I have a girlfriend, and she is so blue", result);
+	}
+	
+	@Test
+	public void testEntryUnused() {
+		map.store("lots", "asdfghjkl", false);
+		map.store("of", "qwertyuiop", false);
+		map.store("things", "zxcvbnm", false);
+		map.store("book", "Hitchhiker's Guide to the Galaxy", false);
+		
+		String result = engine.evaluate("The ${book} is my favourite book", map, "delete-unmatched");
+		assertEquals("The Hitchhiker's Guide to the Galaxy is my favourite book", result);
+	}
 
 }

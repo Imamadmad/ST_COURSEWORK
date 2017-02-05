@@ -147,6 +147,15 @@ public class TemplateEngineTest {
 	}
 	
 	@Test
+	public void testMalformedTemplateMissingTemplatePart() {
+		map.store("fname", "Rose", false);
+		map.store("lname", "Tyler", false);
+		
+		String result = engine.evaluate("Hey there {fname} $lname}", map, "delete-unmatched");
+		assertEquals("Hey there {fname} $lname}", result);
+	}
+	
+	@Test
 	public void testMalformedTemplateOpenWOClose() {
 		map.store("fname", "Rose", false);
 		map.store("lname", "Tyler", false);
@@ -406,5 +415,16 @@ public class TemplateEngineTest {
 		String result = engine.evaluate("The ${book} is my favourite book", map, "delete-unmatched");
 		assertEquals("The Hitchhiker's Guide to the Galaxy is my favourite book", result);
 	}
+	
+	/**
+		Extra bits
+	*/
+	@Test
+	public void testAcceptableTemplateCharacters() {
+		// TODO
+		// a-zA-Z0-9 + special characters (+ emoji 😊)
+		// Note especially the characters ${} appearing in template name
+	}
+	
 
 }

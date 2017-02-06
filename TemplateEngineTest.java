@@ -370,6 +370,13 @@ public class TemplateEngineTest {
 		
 		String result = engine.evaluate("The best ships in the universe: the ${Doctor Who}, the ${StarTrek}, and the ${Star     Wars}", map, "delete-unmatched");
 		assertEquals("The best ships in the universe: the TARDIS, the Enterprise, and the Millennium Falcon", result);
+		
+		map2.store("Doctor Who", "TARDIS", true);
+		map2.store("Star Trek", "Enterprise", true);
+		map2.store("Star Wars", "Millennium Falcon", true);
+		
+		result = engine.evaluate("The best ships in the universe: the ${Doctor Who}, the ${StarTrek}, and the ${Star     Wars}", map2, "delete-unmatched");
+		assertEquals("The best ships in the universe: the TARDIS, the Enterprise, and the Millennium Falcon", result);
 	}
 	
 	@Test
@@ -379,6 +386,13 @@ public class TemplateEngineTest {
 		map.store("Star Wars", "Millennium Falcon", false);
 		
 		String result = engine.evaluate("The best ships in the universe: the ${   Doctor Who}, the ${Star Trek   }, and the ${    Star Wars    }", map, "delete-unmatched");
+		assertEquals("The best ships in the universe: the TARDIS, the Enterprise, and the Millennium Falcon", result);
+		
+		map2.store("Doctor Who", "TARDIS", true);
+		map2.store("Star Trek", "Enterprise", true);
+		map2.store("Star Wars", "Millennium Falcon", true);
+		
+		result = engine.evaluate("The best ships in the universe: the ${   Doctor Who}, the ${Star Trek   }, and the ${    Star Wars    }", map2, "delete-unmatched");
 		assertEquals("The best ships in the universe: the TARDIS, the Enterprise, and the Millennium Falcon", result);
 	}
 	
@@ -390,6 +404,13 @@ public class TemplateEngineTest {
 		
 		String result = engine.evaluate("The best ships in the universe: the ${Doctor\tWho}, the ${Star\nTrek}, and the ${Star\r\nWars}", map, "delete-unmatched");
 		assertEquals("The best ships in the universe: the TARDIS, the Enterprise, and the Millennium Falcon", result);
+		
+		map2.store("Doctor Who", "TARDIS", true);
+		map2.store("Star Trek", "Enterprise", true);
+		map2.store("Star Wars", "Millennium Falcon", true);
+		
+		result = engine.evaluate("The best ships in the universe: the ${Doctor\tWho}, the ${Star\nTrek}, and the ${Star\r\nWars}", map2, "delete-unmatched");
+		assertEquals("The best ships in the universe: the TARDIS, the Enterprise, and the Millennium Falcon", result);
 	}
 	
 	@Test
@@ -398,6 +419,12 @@ public class TemplateEngineTest {
 		map.store("last name", "Tyler", false);
 		
 		String result = engine.evaluate("Hey there ${first name} ${lastname}", map, "delete-unmatched");
+		assertEquals("Hey there Rose Tyler", result);
+		
+		map2.store("firstname", "Rose", true);
+		map2.store("last name", "Tyler", true);
+		
+		result = engine.evaluate("Hey there ${first name} ${lastname}", map2, "delete-unmatched");
 		assertEquals("Hey there Rose Tyler", result);
 	}
 	

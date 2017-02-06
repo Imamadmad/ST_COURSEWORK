@@ -35,6 +35,189 @@ public class TemplateEngineTest {
         String result = engine.evaluate("Hello ${name}, is your age ${age ${symbol}}", map,"delete-unmatched");
         assertEquals("Hello Adam, is your age 29", result);
     }
+
+    
+    @Test
+    /*
+     * Spec1 = null
+     */
+    public void storeArg1Null() {
+      boolean thrown = false;
+
+      try {
+    	map.store(null, "Adam", false);
+      } catch (Exception e) {
+        thrown = true;
+      }
+      assertTrue(thrown);
+    }
+    
+    @Test
+    /*
+     * Spec1 = empty
+     */
+    public void storeArg1Empty() {
+      boolean thrown = false;
+
+      try {
+    	map.store("" , "Adam", false);
+      } catch (Exception e) {
+        thrown = true;
+      }
+      assertTrue(thrown);
+    }
+    
+    @Test
+    /*
+     * Spec2 = null
+     */
+    public void storeArg2Null() {
+      boolean thrown = false;
+
+      try {
+    	map.store("name" , null, false);
+      } catch (Exception e) {
+        thrown = true;
+      }
+      assertTrue(thrown);
+    }
+    
+    @Test
+    /*
+     * ***********unknown result**************
+     * Spec2 = Empty
+     */
+    public void storeArg2Empty() {
+      boolean thrown = false;
+    
+      try {
+    	map.store("name" , "", true);
+
+      } catch (Exception e) {
+        thrown = true;
+      }
+      assertFalse(thrown);
+      
+    }
+    
+    @Test
+    /*
+     * Spec3 = true; All cases will not find a match except last
+     * case, testing arg2 as empty
+     */
+    public void storeArg3True() {
+      boolean thrown = false;
+
+      try {
+    	map.store("name" , "John", true);
+        String result = engine.evaluate("Hello ${nAme}", map,"keep-unmatched");
+        assertEquals("Hello ${nAme}", result);
+        map.store("aGe" , "20", true);
+        String result1 = engine.evaluate("${age} today", map,"keep-unmatched");
+        assertEquals("${age} today", result1);
+    	map.store("nam" , "Edin", true);
+        String result2 = engine.evaluate("${nam} yeah", map,"keep-unmatched");
+        assertEquals("${nam} yeah", result2);
+    	map.store("blank" , "", true);
+        String result3 = engine.evaluate("${blank} space", map,"keep-unmatched");
+        assertEquals(" space", result3);
+    	
+      } catch (Exception e) {
+        thrown = true;
+      }
+      assertFalse(thrown);
+    }
+    
+    @Test
+    /*
+     * Spec3 = false; All cases will find a match
+     */
+    public void storeArg3False() {
+      boolean thrown = false;
+
+      try {
+    	map.store("name" , "John", false);
+        String result = engine.evaluate("Hello ${nAme}", map,"keep-unmatched");
+        assertEquals("Hello John", result);
+        map.store("aGe" , "20", false);
+        String result1 = engine.evaluate("${age} today", map,"keep-unmatched");
+        assertEquals("20 today", result1);
+    	map.store("nam" , "Edin", false);
+        String result2 = engine.evaluate("${nam} yeah", map,"keep-unmatched");
+        assertEquals("Edin yeah", result2);
+    	map.store("blank" , "", false);
+        String result3 = engine.evaluate("${blank} space", map,"keep-unmatched");
+        assertEquals(" space", result3);
+      } catch (Exception e) {
+        thrown = true;
+      }
+      assertFalse(thrown);
+    }
+    
+    @Test
+    /*
+     * Spec3 = null;  All cases will find a match
+     */
+    public void storeArg3Null() {
+      boolean thrown = false;
+
+      try {
+      	map.store("name" , "John", null);
+        String result = engine.evaluate("Hello ${nAme}", map,"keep-unmatched");
+        assertEquals("Hello John", result);
+        map.store("aGe" , "20", null);
+        String result1 = engine.evaluate("${age} today", map,"keep-unmatched");
+        assertEquals("20 today", result1);
+    	map.store("nam" , "Edin", null);
+        String result2 = engine.evaluate("${nam} yeah", map,"keep-unmatched");
+        assertEquals("Edin yeah", result2);
+    	map.store("blank" , "", null);
+        String result3 = engine.evaluate("${blank} space", map,"keep-unmatched");
+        assertEquals(" space", result3);
+      } catch (Exception e) {
+        thrown = true;
+      }
+      assertFalse(thrown);
+    }
+    
+    @Test
+    /*
+     * Spec 4: Entry order is tested based on changes 
+     * in argument 2 and ordering of argument 3
+     */
+    public void storeRepeats() {
+      boolean thrown = false;
+
+      try {
+    	map.store("name" , "first", true);		//Sensitive first choice
+        String result = engine.evaluate("${nAme} space", map,"keep-unmatched");
+        assertEquals("${nAme} space", result);
+    	map.store("name" , "", false);			//Insensitive first choice
+    	map.store("name" , "error", false);		//Never occurs
+        String result1 = engine.evaluate("${nAme} space", map,"keep-unmatched");
+        assertEquals(" space", result1);
+        map.store("name" , "error", true);		//Never occurs
+        String result2 = engine.evaluate("${name} space", map,"keep-unmatched");
+        assertEquals("first space", result2);
+        
+    	map.store("age" , "20", true);			//Sensitive first choice
+        String result3 = engine.evaluate("${aGe} years", map,"keep-unmatched");
+        assertEquals("${aGe} years", result3);
+    	map.store("age" , "", null);			//Insensitive first choice
+    	map.store("age" , "error", null);		//Never occurs
+        String result4 = engine.evaluate("${aGe} years", map,"keep-unmatched");
+        assertEquals(" years", result4);
+        map.store("age" , "error", true);		//Never occurs
+        String result5 = engine.evaluate("${aGe} years", map,"keep-unmatched");
+        assertEquals(" years", result5);
+        String result6 = engine.evaluate("${age} years", map,"keep-unmatched");
+        assertEquals("20 years", result6);
+      } catch (Exception e) {
+        thrown = true;
+      }
+      assertFalse(thrown);
+    }
+    
 	
 	/******************************************************************/
 	/*

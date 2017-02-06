@@ -35,10 +35,11 @@ public class TemplateEngineTest {
         assertEquals("Hello Adam, is your age 29", result);
     }
 
-    
+
     @Test
     /*
      * Spec1 = null
+     * Should throw Run Time Exception
      */
     public void storeArg1Null() {
       boolean thrown = false;
@@ -54,6 +55,7 @@ public class TemplateEngineTest {
     @Test
     /*
      * Spec1 = empty
+     * Should throw Run Time Exception
      */
     public void storeArg1Empty() {
       boolean thrown = false;
@@ -69,6 +71,7 @@ public class TemplateEngineTest {
     @Test
     /*
      * Spec2 = null
+     * Should throw run time exception
      */
     public void storeArg2Null() {
       boolean thrown = false;
@@ -87,16 +90,9 @@ public class TemplateEngineTest {
      * Spec2 = Empty
      */
     public void storeArg2Empty() {
-      boolean thrown = false;
-    
-      try {
-    	map.store("name" , "", true);
-
-      } catch (Exception e) {
-        thrown = true;
-      }
-      assertFalse(thrown);
-      
+    	map.store("name", "", false);
+        String result = engine.evaluate("Hello ${name}", map,"keep-unmatched");
+        assertEquals("Hello ", result);      
     }
     
     @Test
@@ -105,9 +101,6 @@ public class TemplateEngineTest {
      * case, testing arg2 as empty
      */
     public void storeArg3True() {
-      boolean thrown = false;
-
-      try {
     	map.store("name" , "John", true);
         String result = engine.evaluate("Hello ${nAme}", map,"keep-unmatched");
         assertEquals("Hello ${nAme}", result);
@@ -120,11 +113,6 @@ public class TemplateEngineTest {
     	map.store("blank" , "", true);
         String result3 = engine.evaluate("${blank} space", map,"keep-unmatched");
         assertEquals(" space", result3);
-    	
-      } catch (Exception e) {
-        thrown = true;
-      }
-      assertFalse(thrown);
     }
     
     @Test
@@ -132,9 +120,7 @@ public class TemplateEngineTest {
      * Spec3 = false; All cases will find a match
      */
     public void storeArg3False() {
-      boolean thrown = false;
 
-      try {
     	map.store("name" , "John", false);
         String result = engine.evaluate("Hello ${nAme}", map,"keep-unmatched");
         assertEquals("Hello John", result);
@@ -147,10 +133,7 @@ public class TemplateEngineTest {
     	map.store("blank" , "", false);
         String result3 = engine.evaluate("${blank} space", map,"keep-unmatched");
         assertEquals(" space", result3);
-      } catch (Exception e) {
-        thrown = true;
-      }
-      assertFalse(thrown);
+
     }
     
     @Test
@@ -158,9 +141,7 @@ public class TemplateEngineTest {
      * Spec3 = null;  All cases will find a match
      */
     public void storeArg3Null() {
-      boolean thrown = false;
 
-      try {
       	map.store("name" , "John", null);
         String result = engine.evaluate("Hello ${nAme}", map,"keep-unmatched");
         assertEquals("Hello John", result);
@@ -173,10 +154,7 @@ public class TemplateEngineTest {
     	map.store("blank" , "", null);
         String result3 = engine.evaluate("${blank} space", map,"keep-unmatched");
         assertEquals(" space", result3);
-      } catch (Exception e) {
-        thrown = true;
-      }
-      assertFalse(thrown);
+
     }
     
     @Test
@@ -185,9 +163,6 @@ public class TemplateEngineTest {
      * in argument 2 and ordering of argument 3
      */
     public void storeRepeats() {
-      boolean thrown = false;
-
-      try {
     	map.store("name" , "first", true);		//Sensitive first choice
         String result = engine.evaluate("${nAme} space", map,"keep-unmatched");
         assertEquals("${nAme} space", result);
@@ -211,12 +186,8 @@ public class TemplateEngineTest {
         assertEquals(" years", result5);
         String result6 = engine.evaluate("${age} years", map,"keep-unmatched");
         assertEquals("20 years", result6);
-      } catch (Exception e) {
-        thrown = true;
-      }
-      assertFalse(thrown);
     }
-    
+
 	
 	/******************************************************************/
 	/*

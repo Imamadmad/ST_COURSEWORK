@@ -1,5 +1,4 @@
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import st.EntryMap;
@@ -511,26 +510,14 @@ public class TemplateEngineTest {
 					4 - ${fgijk${lm}nopqr}
     */
 	
-	// NOTE; I don't really know how to test this one, and I suspect this
-	//		 is wrong, so please help suggest a better way #TODO
+	// NOTE; I don't really know how to test this one, so please help 
+	// 			figure out this one TODO
 	@Test
-	public void testTemplateOrderPureLength() {
-		map.store("template", "Give me ${subtemplate}!", false);
-		map.store("subtemplate", "5", false);
+	public void testTemplateOrderNesting() {
+		map.store("inside", "outside", false);
 		
-		String result = engine.evaluate("${template}", map, "delete-unmatched");
-		assertEquals("Give me 5!", result);
-		
-		map2.store("really long template name", "Give me ${subtemplate}!", false);
-		map2.store("subtemplate", "5", false);
-		
-		result = engine.evaluate("${really long template name}", map2, "delete-unmatched");
-		assertEquals("Give me ${subtemplate}!", result);
-	}
-	
-	@Test
-	public void testTemplateOrderWithEqualLengths() {
-		
+		String result = engine.evaluate("${${inside}}", map, "keep-unmatched");
+		assertEquals("${outside}", result);
 	}
 	
 	/*
@@ -585,7 +572,7 @@ public class TemplateEngineTest {
 		map.store("thing", "girlfriend", false);
 		
 		String result = engine.evaluate("I have a ${colour} ${thing} with a ${colour} ${thing}. ${colour} are the ${thing} and now the ${thing} are too.  I have a ${thing}, and she is so ${colour}", map, "delete-unmatched");
-		assertEquals("I have a blue house with a blue window. blue are the streets and now the trees are too.  I have a girlfriend, and she is so blue", result);
+		assertEquals("I have a blue house with a blue house. blue are the house and now the house are too.  I have a house, and she is so blue", result);
 	}
 	
 	@Test

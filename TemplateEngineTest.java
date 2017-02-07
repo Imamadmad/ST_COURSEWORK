@@ -232,6 +232,10 @@ public class TemplateEngineTest {
 	public void testMapObjectCanBeNull() {
 		String result = engine.evaluate("Hello world!", null, "delete-unmatched");
 		assertEquals("Hello world!", result);
+		
+		result = engine.evaluate("${template}", null, "delete-unmatched");
+		assertEquals("${template}", result);
+		
 	}
 	
 	/*
@@ -585,13 +589,27 @@ public class TemplateEngineTest {
 	}
 	
 	/**
-		Extra bits
+		Extra bits:
+			No specification of what characters are allowed, so assuming
+			that all characters other than {} are allowed in template
+			entry keys ({} are assumed to be excluded because of evaluate 
+			spec6) and all characters are allowed as template entry values
 	*/
 	@Test
 	public void testAcceptableTemplateCharacters() {
 		// TODO
 		// a-zA-Z0-9 + special characters (+ emoji 😊)
 		// Note especially the characters ${} appearing in template name
+		
+		map.store("abc", "def", false);
+		map.store("123", "456", false);
+		map.store("!@#$%^&*()", "!@#$%^&*()", false);
+		map.store("_+-=`~[]\\|", "_+-=`~[]{}\\|", false);
+		map.store(":;\"'<>,./?", ":;\"'<>,./?", false);
+		
+		String result = engine.evaluate("${abc} ${123} ${!@#$%^&*()} ${_+-=`~[]\\|} ${:;\"'<>,./?}", map, "delete-unmatched");
+		assertEquals("def 456 !@#$%^&*() _+-=`~[]{}\\| :;\"'<>,./?", result);
+		
 	}
 	
 

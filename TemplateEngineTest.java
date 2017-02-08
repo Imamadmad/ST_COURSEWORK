@@ -109,7 +109,7 @@ public class TemplateEngineTest {
         assertEquals("${age} today", result1);
     	map.store("nam" , "Edin", true);
         String result2 = engine.evaluate("${nam} yeah", map,"keep-unmatched");
-        assertEquals("${nam} yeah", result2);
+        assertEquals("Edin yeah", result2);
     	map.store("blank" , "", true);
         String result3 = engine.evaluate("${blank} space", map,"keep-unmatched");
         assertEquals(" space", result3);

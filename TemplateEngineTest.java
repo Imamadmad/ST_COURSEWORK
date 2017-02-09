@@ -666,5 +666,18 @@ public class TemplateEngineTest {
 		
 	}
 	
+	@Test
+	public void testIntroducingNewTemplates() {
+		// TODO
+		// a-zA-Z0-9 + special characters (+ emoji 😊)
+		// Note especially the characters ${} appearing in template name
+		
+		map.store("abc", "${123}", false);
+		map.store("123", "error", false);
+		
+		String result = engine.evaluate("${abc}", map, "delete-unmatched");
+		assertEquals("${123}", result);
+		
+	}
 
 }

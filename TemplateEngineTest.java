@@ -157,39 +157,12 @@ public class TemplateEngineTest {
 
     }
     
-    @Test
     /*
      * Spec 4: Entry order is tested based on changes
      * Spec 5: Only the first entry matters 
      * in argument 2 and ordering of argument 3
      */
-    public void storeRepeats() {
-    	map.store("name" , "first", true);		//Sensitive first choice
-        String result = engine.evaluate("${nAme} space", map,"keep-unmatched");
-        assertEquals("${nAme} space", result);
-    	map.store("name" , "", false);			//Insensitive first choice
-    	map.store("name" , "error", false);		//Never occurs
-        String result1 = engine.evaluate("${nAme} space", map,"keep-unmatched");
-        assertEquals(" space", result1);
-        map.store("name" , "error", true);		//Never occurs
-        String result2 = engine.evaluate("${name} space", map,"keep-unmatched");
-        assertEquals("first space", result2);
-
-        map.store("age" , "20", true);			//Sensitive first choice
-        String result3 = engine.evaluate("${aGe} years", map,"keep-unmatched");
-        assertEquals("${aGe} years", result3);
-    	map.store("age" , "", null);			//Insensitive first choice
-    	map.store("age" , "error", null);		//Never occurs
-        String result4 = engine.evaluate("${aGe} years", map,"keep-unmatched");
-        assertEquals(" years", result4);
-        map.store("age" , "error", true);		//Never occurs
-        String result5 = engine.evaluate("${aGe} years", map,"keep-unmatched");
-        assertEquals(" years", result5);
-        String result6 = engine.evaluate("${age} years", map,"keep-unmatched");
-        assertEquals("20 years", result6);
-        
-    }
-
+	@Test
     public void storeRepeatsTrueFalse() {
     	map.store("name" , "first", true);		//Sensitive first choice
         String result = engine.evaluate("${nAme} space", map,"keep-unmatched");
@@ -202,7 +175,7 @@ public class TemplateEngineTest {
         String result2 = engine.evaluate("${name} space", map,"keep-unmatched");
         assertEquals("first space", result2);
     }
-
+    @Test
     public void storeRepeatsTrueNull() {
     	map.store("age" , "20", true);			//Sensitive first choice
         String result3 = engine.evaluate("${aGe} years", map,"keep-unmatched");
@@ -523,8 +496,8 @@ public class TemplateEngineTest {
 		map.store("fname", "Rose", false);
 		map.store("lname", "Tyler", false);
 		
-		String result = engine.evaluate("Hey there ${fname}} ${lname}}}}}}}", map, "delete-unmatched");
-		assertEquals("Hey there Rose} Tyler}}}}}}", result);
+		String result = engine.evaluate("Hey there ${fname}} { ${lname}}}}}}}", map, "delete-unmatched");
+		assertEquals("Hey there Rose} { Tyler}}}}}}", result);
 		
 		map2.store("fname", "Rose", false);
 		map2.store("lname", "Tyler", false);
@@ -538,14 +511,14 @@ public class TemplateEngineTest {
 		map.store("fname", "Rose", false);
 		map.store("lname", "Tyler", false);
 		
-		String result = engine.evaluate("Hey there ${${fname} ${${${lname} ${", map, "delete-unmatched");
-		assertEquals("Hey there ${Rose ${${Tyler ${", result);
+		String result = engine.evaluate("Hey there ${${fname} ${${${lname} ${}", map, "delete-unmatched");
+		assertEquals("Hey there ${Rose ${${Tyler ", result);
 		
 		map2.store("fname", "Rose", false);
 		map2.store("lname", "Tyler", false);
 		
-		result = engine.evaluate("Hey there ${${fname} ${${${lname} ${", map2, "keep-unmatched");
-		assertEquals("Hey there ${Rose ${${Tyler ${", result);
+		result = engine.evaluate("Hey there ${${fname} ${${${lname} ${}", map2, "keep-unmatched");
+		assertEquals("Hey there ${Rose ${${Tyler ${}", result);
 	}
 	
 	@Test
@@ -563,9 +536,9 @@ public class TemplateEngineTest {
 	public void testNestingMultipleTemplates() {
 		map.store("rank", "Doctor", false);
 		map.store("question", "Who", false);
-		map.store("Doctor Who", "the Doctor", false);
+		map.store("Who Doctor", "the Doctor", false);
 		
-		String result = engine.evaluate("His name is ${${rank}${question}}", map, "delete-unmatched");
+		String result = engine.evaluate("His name is ${${question}${rank}}", map, "delete-unmatched");
 		assertEquals("His name is the Doctor", result);
 	}
 	

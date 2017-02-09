@@ -241,12 +241,14 @@ public class TemplateEngineTest {
 	*/
 	@Test
 	public void testTemplateStringCanBeNull() {
+		map.store("null", "error", false);
 		String result = engine.evaluate(null, map, "delete-unmatched");
 		assertNull(result);
 	}
 	
 	@Test
 	public void testTemplateStringCanBeEmpty() {
+		map.store("null", "error", false);
 		String result = engine.evaluate("", map, "delete-unmatched");
 		assertEquals("", result);
 	}

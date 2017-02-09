@@ -109,7 +109,7 @@ public class TemplateEngineTest {
         assertEquals("${age} today", result1);
     	map.store("nam" , "Edin", true);
         String result2 = engine.evaluate("${nam} yeah", map,"keep-unmatched");
-        assertEquals("${nam} yeah", result2);
+        assertEquals("Edin yeah", result2);
     	map.store("blank" , "", true);
         String result3 = engine.evaluate("${blank} space", map,"keep-unmatched");
         assertEquals(" space", result3);
@@ -159,7 +159,8 @@ public class TemplateEngineTest {
     
     @Test
     /*
-     * Spec 4: Entry order is tested based on changes 
+     * Spec 4: Entry order is tested based on changes
+     * Spec 5: Only the first entry matters 
      * in argument 2 and ordering of argument 3
      */
     public void storeRepeats() {
@@ -173,7 +174,36 @@ public class TemplateEngineTest {
         map.store("name" , "error", true);		//Never occurs
         String result2 = engine.evaluate("${name} space", map,"keep-unmatched");
         assertEquals("first space", result2);
+
+        map.store("age" , "20", true);			//Sensitive first choice
+        String result3 = engine.evaluate("${aGe} years", map,"keep-unmatched");
+        assertEquals("${aGe} years", result3);
+    	map.store("age" , "", null);			//Insensitive first choice
+    	map.store("age" , "error", null);		//Never occurs
+        String result4 = engine.evaluate("${aGe} years", map,"keep-unmatched");
+        assertEquals(" years", result4);
+        map.store("age" , "error", true);		//Never occurs
+        String result5 = engine.evaluate("${aGe} years", map,"keep-unmatched");
+        assertEquals(" years", result5);
+        String result6 = engine.evaluate("${age} years", map,"keep-unmatched");
+        assertEquals("20 years", result6);
         
+    }
+
+    public void storeRepeatsTrueFalse() {
+    	map.store("name" , "first", true);		//Sensitive first choice
+        String result = engine.evaluate("${nAme} space", map,"keep-unmatched");
+        assertEquals("${nAme} space", result);
+    	map.store("name" , "", false);			//Insensitive first choice
+    	map.store("name" , "error", false);		//Never occurs
+        String result1 = engine.evaluate("${nAme} space", map,"keep-unmatched");
+        assertEquals(" space", result1);
+        map.store("name" , "error", true);		//Never occurs
+        String result2 = engine.evaluate("${name} space", map,"keep-unmatched");
+        assertEquals("first space", result2);
+    }
+
+    public void storeRepeatsTrueNull() {
     	map.store("age" , "20", true);			//Sensitive first choice
         String result3 = engine.evaluate("${aGe} years", map,"keep-unmatched");
         assertEquals("${aGe} years", result3);
@@ -188,6 +218,31 @@ public class TemplateEngineTest {
         assertEquals("20 years", result6);
     }
 
+
+	/*
+		spec5 - The EntryMap objects stored again, only keeps the first entry
+    */
+    @Test
+	public void testSpec5RepeatedEntryWithSpace() {
+		map.store("na me", "Adam", true);
+		map.store("name", "John", true);
+		map.store("name","John",true);
+		map.store("${na ${asdasadsadasd}me}", "", false);
+	
+		String result = engine.evaluate("Hello ${name} ${na me} ${na${asdasadsadasd}me}", map,"delete-unmatched");
+		assertEquals("Hello Adam Adam Adam", result);
+	}
+
+    @Test
+	public void testSpec5RepeatedEntryWithBackslashSpace() {
+		map.store("na\tme", "Adam", true);
+		map.store("name", "John", true);
+		map.store("name","John",true);
+		map.store("${na ${asdasadsadasd}me}", "", false);
+	
+		String result = engine.evaluate("Hello ${name} ${na me} ${na${asdasadsadasd}me}", map,"delete-unmatched");
+		assertEquals("Hello Adam Adam Adam", result);
+	}
 	
 	/******************************************************************/
 	/*
@@ -239,6 +294,20 @@ public class TemplateEngineTest {
 	}
 	
 	/*
+		spec1 and 2 - EntryMap and Template string can be null 
+    */
+	@Test
+	public void testMapAndTemplateNull() {
+		String result = engine.evaluate(null, null, "keep-unmatched");
+		assertNull(result);
+		
+		result = engine.evaluate("", null, "keep-unmatched");
+		assertEquals("", result);
+		
+	}
+
+
+	/*
 		spec3 - Matching mode cannot be NULL and must be one of the 
 			possible values ("keep-unmatched" and "delete-unmatched"). 
 			If matching mode NULL or other value, it defaults to 
@@ -264,8 +333,8 @@ public class TemplateEngineTest {
 	
 	@Test
 	public void testMatchingModeInvalid() {
-		map.store("fname", "Rose", false);
-		map.store("lname", "Tyler", false);
+		map.store("fname", "Rose", true);
+		map.store("lname", "Tyler", true);
 		
 		String result = engine.evaluate("${fname} ${lname} is ${age} years old", map, "foo");
 		assertEquals("Rose Tyler is  years old", result);
@@ -273,11 +342,11 @@ public class TemplateEngineTest {
 	
 	@Test
 	public void testMatchingModeNull() {
-		map.store("fname", "Rose", false);
+		map.store("Fname", "Rose", true);
 		map.store("lname", "Tyler", false);
 		
 		String result = engine.evaluate("${fname} ${lname} is ${age} years old", map, null);
-		assertEquals("Rose Tyler is  years old", result);
+		assertEquals(" Tyler is  years old", result);
 	}
 	
 	/*
@@ -308,8 +377,8 @@ public class TemplateEngineTest {
 		map.store("fname", "Rose", false);
 		map.store("lname", "Tyler", false);
 		
-		String result = engine.evaluate("Hey there {fname} $lname}", map, "delete-unmatched");
-		assertEquals("Hey there {fname} $lname}", result);
+		String result = engine.evaluate("Hey there {fname} $lname} ${age} 2", map, "delete-unmatched");
+		assertEquals("Hey there {fname} $lname}  2", result);
 	}
 	
 	@Test
@@ -317,8 +386,8 @@ public class TemplateEngineTest {
 		map.store("fname", "Rose", false);
 		map.store("lname", "Tyler", false);
 		
-		String result = engine.evaluate("Hey there ${fname ${lname}", map, "delete-unmatched");
-		assertEquals("Hey there ${fname Tyler", result);
+		String result = engine.evaluate("Hey there ${fname ${lname } ${age} 2", map, "keep-unmatched");
+		assertEquals("Hey there ${fname Tyler ${age} 2", result);
 		
 		map2.store("fname", "Rose", false);
 		map2.store("lname", "Tyler", false);
@@ -340,6 +409,9 @@ public class TemplateEngineTest {
 		
 		result = engine.evaluate("Hey there ${fname} lname}", map2, "delete-unmatched");
 		assertEquals("Hey there Rose lname}", result);
+		
+		result = engine.evaluate("Hey there ${fname} lname}}} {a ge}", map2, "delete-unmatched");
+		assertEquals("Hey there Rose lname}}} {a ge}", result);
 	}
 	
 	@Test
@@ -347,14 +419,14 @@ public class TemplateEngineTest {
 		map.store("fname", "Rose", false);
 		map.store("lname", "Tyler", false);
 		
-		String result = engine.evaluate("Hey there $}fname} ${lname{", map, "delete-unmatched");
-		assertEquals("Hey there $}fname} ${lname{", result);
+		String result = engine.evaluate("Hey there $}fname} ${lname{ ${lname{}", map, "delete-unmatched");
+		assertEquals("Hey there $}fname} ${lname{ ", result);
 		
 		map2.store("fname", "Rose", false);
 		map2.store("lname", "Tyler", false);
 		
-		result = engine.evaluate("Hey there {$fname} }lname${", map2, "delete-unmatched");
-		assertEquals("Hey there {$fname} }lname${", result);
+		result = engine.evaluate("Hey there {$fname} }lname${ ${}", map2, "keep-unmatched");
+		assertEquals("Hey there {$fname} }lname${ ${}", result);
 	}
 	
 	/*
@@ -522,6 +594,15 @@ public class TemplateEngineTest {
 		assertEquals("${outside}", result);
 	}
 	
+	@Test
+	public void testOrderingOfTemplates() {
+		map.store("na me", "Adam", true);
+		map.store("na         ${asdasadsadasd}me", "error", false);
+		map.store("asdasadsadasd", "", false);
+	
+		String result = engine.evaluate("Hello ${na me} ${na         ${asdasadsadasd}me}", map,"keep-unmatched");
+		assertEquals("Hello Adam Adam", result);
+	}
 	/*
 		spec8 - The engine processes one template at a time and attempts to 
 			match it against the keys of the EntryMap entries until there 

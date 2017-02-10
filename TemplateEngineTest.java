@@ -208,13 +208,16 @@ public class TemplateEngineTest {
 
     @Test
 	public void testSpec5RepeatedEntryWithBackslashSpace() {
-		map.store("na\tme", "Adam", true);
-		map.store("name", "John", true);
-		map.store("name","John",true);
-		map.store("${na ${asdasadsadasd}me}", "", false);
+		map.store("fna\tme", "Adam", true);		// Tab
+		map.store("lna\nme", "Mitchell", true);	// Newline
+		map.store("fname", "John", true);
+		map.store("fname","John",true);
+		map.store("lname","Smith",true);
+		map.store("${fna ${asdasadsadasd}me}", "", false);
+		map.store("${lna ${asdasadsadasd}me}", "", false);
 	
-		String result = engine.evaluate("Hello ${name} ${na me} ${na${asdasadsadasd}me}", map,"delete-unmatched");
-		assertEquals("Hello Adam Adam Adam", result);
+		String result = engine.evaluate("Hello ${fname} ${lname} ${fna me} ${lna me} ${fna${asdasadsadasd}me} ${lna ${asdasadsadasd}me}", map,"delete-unmatched");
+		assertEquals("Hello Adam Mitchell Adam Mitchell Adam Mitchell", result);
 	}
 	
 	/******************************************************************/

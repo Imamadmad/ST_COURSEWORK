@@ -262,6 +262,8 @@ public class TemplateEngineTest {
 	public void testMapObjectCanBeNull() {
 		String result = engine.evaluate("Hello world!", null, "delete-unmatched");
 		assertEquals("Hello world!", result);
+
+		map.store("template", "error", false);
 		
 		result = engine.evaluate("${template}", null, "delete-unmatched");
 		assertEquals("${template}", result);
@@ -314,6 +316,16 @@ public class TemplateEngineTest {
 		String result = engine.evaluate("${fname} ${lname} is ${age} years old", map, "foo");
 		assertEquals("Rose Tyler is  years old", result);
 	}
+
+	@Test
+	public void testMatchingModeEmpty() {
+		map.store("fname", "Rose", true);
+		map.store("lname", "Tyler", true);
+		
+		String result = engine.evaluate("${fname} ${lname} is ${age} years old", map, "");
+		assertEquals("Rose Tyler is  years old", result);
+	}
+
 	
 	@Test
 	public void testMatchingModeNull() {
@@ -562,13 +574,35 @@ public class TemplateEngineTest {
 	// NOTE; I don't really know how to test this one, so please help 
 	// 			figure out this one TODO
 	@Test
-	public void testTemplateOrderNesting() {
+	public void testTemplateOrderNesting1() {
 		map.store("inside", "outside", false);
 		
 		String result = engine.evaluate("${${inside}}", map, "keep-unmatched");
 		assertEquals("${outside}", result);
 	}
+
+	@Test
+	public void testTemplateNestingChanges() {
+		map.store("one", "1", false);
+		map.store("two", "", false);
+		map.store("long", "last", false);
+		
+		String result = engine.evaluate("${long ${one}} and ${long ${two}} and ${two} and ${one}", map, "keep-unmatched");
+		assertEquals("${long 1} and last and  and 1", result);
+	}
 	
+	@Test
+	public void testTemplateOrdering() {
+		map.store("one", "1", false);
+		map.store("long", "last", false);
+		
+		String result = engine.evaluate("${long ${one}} and ${one}", map, "keep-unmatched");
+		assertEquals("${long 1} and 1", result);
+
+		result = engine.evaluate("${long ${one}} and ${long}", map, "keep-unmatched");
+		assertEquals("${long 1} and last", result);
+	}
+
 	@Test
 	public void testOrderingOfTemplates() {
 		map.store("na me", "Adam", true);
@@ -681,5 +715,49 @@ public class TemplateEngineTest {
 		assertEquals("${123}", result);
 		
 	}
+	//todo PLEASE CHECK THIS CASE
+	@Test
+	public void testNonAlphaCaseSensitive() {
+		map.store("$", "$", true);
+        String result = engine.evaluate("${${${${$}}}}", map, "keep-unmatched");
+        //not sure what the answer is.....
+        //1. $
+        //2. ${$}
+        //3. ${${$}}
+        //4. ${${${$}}}
+        assertEquals("$", result);
+        //1. $
+        //2. ${$}
+        result = engine.evaluate("${${$}} ${$}", map, "keep-unmatched");
+        assertEquals("$ $", result);
+	}
 
+	@Test
+	public void deleteUnmatchedFromOtherTemplates() {
+		String result = engine.evaluate("${$}hello${${$}}heh${$}", map, "delete-unmatched");
+		assertEquals("helloheh", result);
+	}
+
+	@Test
+	public void testNonAlphaCaseSensitive2() {
+		map.store("/.,123$%678(-+~`?", "pass", true);
+		String result = engine.evaluate("${/.,123$%678(-+~`?}", map, "keep-unmatched");
+		assertEquals("pass", result);
+	}
+
+	@Test
+	public void testTemplateOrderNesting2() {
+		map.store("${}", "outside", false);
+		
+		String result = engine.evaluate("${${}}", map, "keep-unmatched");
+		assertEquals("outside", result);
+	}
+
+	@Test
+	public void testTemplateDeleteToEmpty() {
+		map.store("${}", "pass", false);
+		
+		String result = engine.evaluate("${${}}", map, "delete-unmatched");
+		assertEquals("", result);
+	}
 }

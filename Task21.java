@@ -805,7 +805,7 @@ public class Task21 {
 
       assertThat(entries.get(0).hashCode(), is(entries.get(0).hashCode()));
       assertThat(entries.get(0).hashCode(), not(entries.get(1).hashCode()));
-      assertThat(entries.get(2).hashCode(), not(entries.get(3).hashCode()));
+      assertThat(entries.get(3).hashCode(), not(entries.get(2).hashCode()));
       assertThat(entries.get(0).hashCode(), not(entries.get(3).hashCode()));
       assertThat(entries.get(0).hashCode(), not(entries.get(4).hashCode()));
   }
@@ -821,6 +821,19 @@ public class Task21 {
 
     String result = engine.evaluate("${3} ${${1}${2}} ${2} ${3${${1}${2}}} ${23}", map, "keep-unmatched");
 		assertEquals("3 4 2 6 5", result);
+  }
+
+  @Test
+  public void testDoReplace() {
+    map.store("bla", "blabla", false);
+
+    String result = engine.evaluate("${bla}", map, "keep-unmatched");
+		assertEquals("blabla", result);
+
+    map2.store("bla", "blablah", false);
+
+    result = engine.evaluate("${bla}", map2, "keep-unmatched");
+		assertEquals("blablah", result);
   }
 
 

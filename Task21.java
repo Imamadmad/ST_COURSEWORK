@@ -777,17 +777,20 @@ public class Task21 {
   */
   @Test
   public void testEntryEqualsMethod() {
-    map.store("hello", "world", false);
     map.store("hello", "world", true);
-    map.store("hello", "World", false);
-    map.store("  hello  ", "World", false);
+    map.store("hello", "world", false);
+    map.store("hello", "World", true);
+    map.store("  hello  ", "World", true);
+    map.store("  hello  ", "World", null);
 
     ArrayList entries = map.getEntries();
 
     assertEquals(false, entries.get(0).equals(entries.get(1)));
     assertEquals(false, entries.get(0).equals(entries.get(2)));
     assertEquals(false, entries.get(2).equals(entries.get(3)));
+    assertEquals(false, entries.get(3).equals(entries.get(4)));
     assertEquals(false, entries.get(0).equals(null));
+    assertEquals(false, entries.get(0).equals("blah"));
   }
 
   @Test

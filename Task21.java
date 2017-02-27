@@ -786,6 +786,7 @@ public class Task21 {
     assertEquals(false, entries.get(0).equals(entries.get(1)));
     assertEquals(false, entries.get(0).equals(entries.get(2)));
     assertEquals(false, entries.get(2).equals(entries.get(3)));
+    assertEquals(false, entries.get(0).equals(null));
 
   }
 

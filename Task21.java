@@ -1,4 +1,5 @@
 import static org.junit.Assert.*;
+import java.util.*;
 import org.junit.Before;
 import org.junit.Test;
 import st.EntryMap;
@@ -769,4 +770,24 @@ public class Task21 {
 		String result = engine.evaluate("${${}}", map, "delete-unmatched");
 		assertEquals("", result);
 	}
+
+  /**
+    Tests of other methods for Assignment 2.1
+  */
+  @Test
+  public void testEntryEqualsMethod() {
+    map.store("hello", "world", false);
+    map.store("hello", "world", true);
+    map.store("hello", "World", false);
+    map.store("  hello  ", "World", false);
+
+    ArrayList entries = map.getEntries();
+
+    assertEquals(false, entries.get(0).equals(entries.get(1)));
+    assertEquals(false, entries.get(0).equals(entries.get(2)));
+    assertEquals(false, entries.get(2).equals(entries.get(3)));
+
+  }
+
+
 }

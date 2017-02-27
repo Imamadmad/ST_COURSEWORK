@@ -1,4 +1,5 @@
 import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
 import java.util.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -787,7 +788,23 @@ public class Task21 {
     assertEquals(false, entries.get(0).equals(entries.get(2)));
     assertEquals(false, entries.get(2).equals(entries.get(3)));
     assertEquals(false, entries.get(0).equals(null));
+  }
 
+  @Test
+  public void testEntryHashCode() {
+      map.store("hello", "world", true);
+      map.store("hello", "world", false);
+      map.store("hallo", "world", null);
+      map.store("hallo", "world", true);
+      map.store("hello", "earth", true);
+
+      ArrayList entries = map.getEntries();
+
+      assertThat(entries.get(0).hashCode(), is(entries.get(0).hashCode()));
+      assertThat(entries.get(0).hashCode(), not(entries.get(1).hashCode()));
+      assertThat(entries.get(2).hashCode(), not(entries.get(3).hashCode()));
+      assertThat(entries.get(0).hashCode(), not(entries.get(3).hashCode()));
+      assertThat(entries.get(0).hashCode(), not(entries.get(4).hashCode()));
   }
 
 

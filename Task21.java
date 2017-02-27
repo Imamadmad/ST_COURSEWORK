@@ -1,5 +1,3 @@
-package st;
-
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 import java.util.*;
@@ -837,8 +835,8 @@ public class Task21 {
     result = engine.evaluate("${bla}", map2, "keep-unmatched");
 		assertEquals("blablah", result);
   }
-  
-  @Test 
+
+  @Test
   public void testNoStore(){
 	  String result = engine.evaluate("nothing has stored ${a}", null, "keep-unmatched");
 	  assertEquals("nothing has stored ${a}", result);
@@ -851,7 +849,7 @@ public class Task21 {
 		String result = engine.evaluate("${${}}", map, "keep-unmatched");
 		assertEquals("", result);
 	}
-  
+
   @Test
 	public void testSpacingAgain() {
 		map.store("${ }", "${}", false);

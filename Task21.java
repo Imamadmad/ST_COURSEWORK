@@ -807,5 +807,18 @@ public class Task21 {
       assertThat(entries.get(0).hashCode(), not(entries.get(4).hashCode()));
   }
 
+  @Test
+  public void testTemplateSort() {
+    map.store("1", "1", false);
+    map.store("2", "2", false);
+    map.store("3", "3", false);
+    map.store("12", "4", false);
+    map.store("23", "5", false);
+    map.store("34", "6", false);
+
+    String result = engine.evaluate("${3} ${${1}${2}} ${2} ${3${${1}${2}}} ${23}", map, "keep-unmatched");
+		assertEquals("3 4 2 6 5", result);
+  }
+
 
 }

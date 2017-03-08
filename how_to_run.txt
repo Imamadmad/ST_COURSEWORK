@@ -1,2 +1,2 @@
-javac -cp .:/usr/share/java/junit4.jar Task21.java st/*.java
-java -cp .:/usr/share/java/junit4.jar org.junit.runner.JUnitCore Task21
+javac -cp .:/usr/share/java/junit4.jar:./Mutations/m_0.jar Task22.java
+java -cp .:/usr/share/java/junit4.jar:./Mutations/m_0.jar org.junit.runner.JUnitCore Task22

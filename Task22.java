@@ -21,83 +21,6 @@ public class Task22 {
     }
 
     @Test
-    public void Test1() {
-        map.store("name", "Adam", false);
-        map.store("surname", "Dykes", false);
-        String result = engine.evaluate("Hello ${name} ${surname}", map,"delete-unmatched");
-        assertEquals("Hello Adam Dykes", result);
-    }
-
-    @Test
-    public void Test2() {
-        map.store("name", "Adam", false);
-        map.store("surname", "Dykes", false);
-        map.store("age", "29", false);
-        String result = engine.evaluate("Hello ${name}, is your age ${age ${symbol}}", map,"delete-unmatched");
-        assertEquals("Hello Adam, is your age 29", result);
-    }
-
-
-    @Test
-    /*
-     * Spec1 = null
-     * Should throw Run Time Exception
-     */
-    public void storeArg1Null() {
-      boolean thrown = false;
-
-      try {
-    	map.store(null, "Adam", false);
-      } catch (Exception e) {
-        thrown = true;
-      }
-      assertTrue(thrown);
-    }
-
-    @Test
-    /*
-     * Spec1 = empty
-     * Should throw Run Time Exception
-     */
-    public void storeArg1Empty() {
-      boolean thrown = false;
-
-      try {
-    	map.store("" , "Adam", false);
-      } catch (Exception e) {
-        thrown = true;
-      }
-      assertTrue(thrown);
-    }
-
-    @Test
-    /*
-     * Spec2 = null
-     * Should throw run time exception
-     */
-    public void storeArg2Null() {
-      boolean thrown = false;
-
-      try {
-    	map.store("name" , null, false);
-      } catch (Exception e) {
-        thrown = true;
-      }
-      assertTrue(thrown);
-    }
-
-    @Test
-    /*
-     * ***********unknown result**************
-     * Spec2 = Empty
-     */
-    public void storeArg2Empty() {
-    	map.store("name", "", false);
-        String result = engine.evaluate("Hello ${name}", map,"keep-unmatched");
-        assertEquals("Hello ", result);
-    }
-
-    @Test
     /*
      * Spec3 = true; All cases will not find a match except last
      * case, testing arg2 as empty
@@ -220,23 +143,6 @@ public class Task22 {
 
 		String result = engine.evaluate("Hello ${fname} ${lname} ${fna me} ${lna me} ${fna${asdasadsadasd}me} ${lna ${asdasadsadasd}me}", map,"delete-unmatched");
 		assertEquals("Hello Adam Mitchell Adam Mitchell Adam Mitchell", result);
-	}
-
-	/******************************************************************/
-	/*
-		Testing TemplateEngine.evaluate()
-	*/
-
-	/**
-		Default example from spec
-	*/
-	@Test
-	public void testDefaultExample() {
-		map.store("name", "Adam", false);
-		map.store("surname", "Dykes", false);
-
-		String result = engine.evaluate("Hello ${name} ${surname}", map,"delete-unmatched");
-		assertEquals("Hello Adam Dykes", result);
 	}
 
 	/**
@@ -371,15 +277,6 @@ public class Task22 {
 	}
 
 	@Test
-	public void testMalformedTemplateMissingTemplatePart() {
-		map.store("fname", "Rose", false);
-		map.store("lname", "Tyler", false);
-
-		String result = engine.evaluate("Hey there {fname} $lname} ${age} 2", map, "delete-unmatched");
-		assertEquals("Hey there {fname} $lname}  2", result);
-	}
-
-	@Test
 	public void testMalformedTemplateOpenWOClose() {
 		map.store("fname", "Rose", false);
 		map.store("lname", "Tyler", false);
@@ -394,38 +291,6 @@ public class Task22 {
 		assertEquals("Hey there Rose ${lname", result);
 	}
 
-	@Test
-	public void testMalformedTemplateCloseWOOpen() {
-		map.store("fname", "Rose", false);
-		map.store("lname", "Tyler", false);
-
-		String result = engine.evaluate("Hey there fname} ${lname}", map, "delete-unmatched");
-		assertEquals("Hey there fname} Tyler", result);
-
-		map2.store("fname", "Rose", false);
-		map2.store("lname", "Tyler", false);
-
-		result = engine.evaluate("Hey there ${fname} lname}", map2, "delete-unmatched");
-		assertEquals("Hey there Rose lname}", result);
-
-		result = engine.evaluate("Hey there ${fname} lname}}} {a ge}", map2, "delete-unmatched");
-		assertEquals("Hey there Rose lname}}} {a ge}", result);
-	}
-
-	@Test
-	public void testMalformedTemplateBackards() {
-		map.store("fname", "Rose", false);
-		map.store("lname", "Tyler", false);
-
-		String result = engine.evaluate("Hey there $}fname} ${lname{ ${lname{}", map, "delete-unmatched");
-		assertEquals("Hey there $}fname} ${lname{ ", result);
-
-		map2.store("fname", "Rose", false);
-		map2.store("lname", "Tyler", false);
-
-		result = engine.evaluate("Hey there {$fname} }lname${ ${}", map2, "keep-unmatched");
-		assertEquals("Hey there {$fname} }lname${ ${}", result);
-	}
 
 	/*
 		spec5 - When a template is matched against an entry key, any
@@ -678,16 +543,6 @@ public class Task22 {
 		assertEquals("I have a blue house with a blue house. blue are the house and now the house are too.  I have a house, and she is so blue", result);
 	}
 
-	@Test
-	public void testEntryUnused() {
-		map.store("lots", "asdfghjkl", false);
-		map.store("of", "qwertyuiop", false);
-		map.store("things", "zxcvbnm", false);
-		map.store("book", "Hitchhiker's Guide to the Galaxy", false);
-
-		String result = engine.evaluate("The ${book} is my favourite book", map, "delete-unmatched");
-		assertEquals("The Hitchhiker's Guide to the Galaxy is my favourite book", result);
-	}
 
 	/**
 		Extra bits:

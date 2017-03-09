@@ -145,88 +145,6 @@ public class Task22 {
 		assertEquals("Hello Adam Mitchell Adam Mitchell Adam Mitchell", result);
 	}
 
-<<<<<<< HEAD
-	/**
-		spec1 - The template string can be NULL or empty.
-				If template string NULL or empty, then the unchanged
-				template string is returned.
-	*/
-	@Test
-	public void testTemplateStringCanBeNull() {
-		map.store("null", "error", false);
-		String result = engine.evaluate(null, map, "delete-unmatched");
-		assertNull(result);
-	}
-
-	@Test
-	public void testTemplateStringCanBeEmpty() {
-		map.store("null", "error", false);
-		String result = engine.evaluate("", map, "delete-unmatched");
-		assertEquals("", result);
-	}
-
-	/*
-		spec2 - The EntryMap object can be NULL.
-			If EntryMap object NULL, then the unchanged template string
-			is returned.
-    */
-	@Test
-	public void testMapObjectCanBeNull() {
-		String result = engine.evaluate("Hello world!", null, "delete-unmatched");
-		assertEquals("Hello world!", result);
-
-		map.store("template", "error", false);
-
-		result = engine.evaluate("${template}", null, "delete-unmatched");
-		assertEquals("${template}", result);
-
-	}
-
-  @Test
-  public void testMapObjectCanHaveNoContent() {
-  		String result = engine.evaluate("Hello world!", map, "delete-unmatched");
-  		assertEquals("Hello world!", result);
-  }
-
-	/*
-		spec1 and 2 - EntryMap and Template string can be null
-    */
-	@Test
-	public void testMapAndTemplateNull() {
-		String result = engine.evaluate(null, null, "keep-unmatched");
-		assertNull(result);
-
-		result = engine.evaluate("", null, "keep-unmatched");
-		assertEquals("", result);
-
-	}
-
-
-	/*
-		spec3 - Matching mode cannot be NULL and must be one of the
-			possible values ("keep-unmatched" and "delete-unmatched").
-			If matching mode NULL or other value, it defaults to
-			"delete-unmatched".
-    */
-=======
-	/******************************************************************/
-	/*
-		Testing TemplateEngine.evaluate()
-	*/
-
-	/**
-		Default example from spec
-	*/
-	@Test
-	public void testDefaultExample() {
-		map.store("name", "Adam", false);
-		map.store("surname", "Dykes", false);
-
-		String result = engine.evaluate("Hello ${name} ${surname}", map,"delete-unmatched");
-		assertEquals("Hello Adam Dykes", result);
-	}
-
->>>>>>> c2339a876839c7a2a9f26075ba6370ba497f84a5
 	@Test
 	public void testMatchingModeKeepUnmatched() {
 		map.store("fname", "Rose", false);
@@ -495,43 +413,6 @@ public class Task22 {
 		String result = engine.evaluate("${three} ${two} ${one}", map, "delete-unmatched");
 		assertEquals("3 2 1", result);
 	}
-
-<<<<<<< HEAD
-	//TODO: Discuss expected output of these two situations
-	@Test
-	public void testTemplateCalledMultipleTimes() {
-		map.store("thing", "test", false);
-		map.store("action", "test", false);
-
-		String result = engine.evaluate("Yo dawg! I heard you liked ${thing}s, so I put a ${thing} in your ${thing} so you can ${action} while you ${action}", map, "delete-unmatched");
-		assertEquals("Yo dawg! I heard you liked tests, so I put a test in your test so you can test while you test", result);
-	}
-
-	@Test
-	public void testMultipleEntriesTheSame() {
-		map.store("colour", "blue", false);
-		map.store("thing", "house", false);
-		map.store("thing", "window", false);
-		map.store("thing", "streets", false);
-		map.store("thing", "trees", false);
-		map.store("thing", "girlfriend", false);
-
-		String result = engine.evaluate("I have a ${colour} ${thing} with a ${colour} ${thing}. ${colour} are the ${thing} and now the ${thing} are too.  I have a ${thing}, and she is so ${colour}", map, "delete-unmatched");
-		assertEquals("I have a blue house with a blue house. blue are the house and now the house are too.  I have a house, and she is so blue", result);
-	}
-
-=======
-	@Test
-	public void testEntryUnused() {
-		map.store("lots", "asdfghjkl", false);
-		map.store("of", "qwertyuiop", false);
-		map.store("things", "zxcvbnm", false);
-		map.store("book", "Hitchhiker's Guide to the Galaxy", false);
-
-		String result = engine.evaluate("The ${book} is my favourite book", map, "delete-unmatched");
-		assertEquals("The Hitchhiker's Guide to the Galaxy is my favourite book", result);
-	}
->>>>>>> c2339a876839c7a2a9f26075ba6370ba497f84a5
 
 	/**
 		Extra bits:

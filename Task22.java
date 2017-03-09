@@ -145,6 +145,7 @@ public class Task22 {
 		assertEquals("Hello Adam Mitchell Adam Mitchell Adam Mitchell", result);
 	}
 
+<<<<<<< HEAD
 	/**
 		spec1 - The template string can be NULL or empty.
 				If template string NULL or empty, then the unchanged
@@ -207,6 +208,25 @@ public class Task22 {
 			If matching mode NULL or other value, it defaults to
 			"delete-unmatched".
     */
+=======
+	/******************************************************************/
+	/*
+		Testing TemplateEngine.evaluate()
+	*/
+
+	/**
+		Default example from spec
+	*/
+	@Test
+	public void testDefaultExample() {
+		map.store("name", "Adam", false);
+		map.store("surname", "Dykes", false);
+
+		String result = engine.evaluate("Hello ${name} ${surname}", map,"delete-unmatched");
+		assertEquals("Hello Adam Dykes", result);
+	}
+
+>>>>>>> c2339a876839c7a2a9f26075ba6370ba497f84a5
 	@Test
 	public void testMatchingModeKeepUnmatched() {
 		map.store("fname", "Rose", false);
@@ -353,50 +373,6 @@ public class Task22 {
 	}
 
 	@Test
-	public void testWhitespaceNoneInOriginalWord() {
-		map.store("firstname", "Rose", false);
-		map.store("last name", "Tyler", false);
-
-		String result = engine.evaluate("Hey there ${first name} ${lastname}", map, "delete-unmatched");
-		assertEquals("Hey there Rose Tyler", result);
-
-		map2.store("firstname", "Rose", true);
-		map2.store("last name", "Tyler", true);
-
-		result = engine.evaluate("Hey there ${first name} ${lastname}", map2, "delete-unmatched");
-		assertEquals("Hey there Rose Tyler", result);
-	}
-
-	/*
-		spec6 - In a template string every "${" and "}" occurrence acts as
-			a boundary of at MOST one template.
-            ---> Processing from left-to-right, each "}" occurrence that is
-				not already a boundary to a template is matched to its
-				closest preceding "${" occurrence which also is not already
-				a boundary to a template.
-            ---> In the template string "I heard that }: ${name} said: ${we
-				should try or best for winning the ${competition} cup.}" the
-				templates are:
-					1 - ${name}
-					2 - ${competition}
-					3 - ${we should try or best for winning the ${competition} cup.}
-    */
-	@Test
-	public void testNestingMultipleCloses() {
-		map.store("fname", "Rose", false);
-		map.store("lname", "Tyler", false);
-
-		String result = engine.evaluate("Hey there ${fname}} { ${lname}}}}}}}", map, "delete-unmatched");
-		assertEquals("Hey there Rose} { Tyler}}}}}}", result);
-
-		map2.store("fname", "Rose", false);
-		map2.store("lname", "Tyler", false);
-
-		result = engine.evaluate("Hey there ${fname}} ${lname}}}}}}}", map2, "keep-unmatched");
-		assertEquals("Hey there Rose} Tyler}}}}}}", result);
-	}
-
-	@Test
 	public void testNestingMultipleOpenings() {
 		map.store("fname", "Rose", false);
 		map.store("lname", "Tyler", false);
@@ -520,6 +496,7 @@ public class Task22 {
 		assertEquals("3 2 1", result);
 	}
 
+<<<<<<< HEAD
 	//TODO: Discuss expected output of these two situations
 	@Test
 	public void testTemplateCalledMultipleTimes() {
@@ -543,6 +520,18 @@ public class Task22 {
 		assertEquals("I have a blue house with a blue house. blue are the house and now the house are too.  I have a house, and she is so blue", result);
 	}
 
+=======
+	@Test
+	public void testEntryUnused() {
+		map.store("lots", "asdfghjkl", false);
+		map.store("of", "qwertyuiop", false);
+		map.store("things", "zxcvbnm", false);
+		map.store("book", "Hitchhiker's Guide to the Galaxy", false);
+
+		String result = engine.evaluate("The ${book} is my favourite book", map, "delete-unmatched");
+		assertEquals("The Hitchhiker's Guide to the Galaxy is my favourite book", result);
+	}
+>>>>>>> c2339a876839c7a2a9f26075ba6370ba497f84a5
 
 	/**
 		Extra bits:
@@ -689,12 +678,6 @@ public class Task22 {
 
     result = engine.evaluate("${bla}", map2, "keep-unmatched");
 		assertEquals("blablah", result);
-  }
-
-  @Test
-  public void testNoStore(){
-	  String result = engine.evaluate("nothing has stored ${a}", null, "keep-unmatched");
-	  assertEquals("nothing has stored ${a}", result);
   }
 
   @Test

@@ -1,0 +1,7 @@
+NEW TemplateEngine.evaluate specification
+
+TemplateEngine should have an additional matching mode called "optimization".
+
+When the matching mode is "optimization", the TemplateEngine should internally try the two other matching modes ("keep-unmatched" and "delete-unmatched") and use the one which replaces the most templates.
+
+In the case that both matching modes replace the same number of templates, "keep-unmatched" should be used.

@@ -12,6 +12,7 @@ public class TemplateEngine {
 
     private static final String MM_KEEP = "keep-unmatched";
     private static final String MM_DELETE = "delete-unmatched";
+    private static final String MM_OPT = "optimization";
 
     public TemplateEngine(){
 
@@ -56,6 +57,9 @@ public class TemplateEngine {
         }
         if (matchingMode.equals(MM_DELETE)){
             return Boolean.TRUE;
+        }
+        if(matchingMode.equals(MM_OPT)){
+          return Boolean.TRUE;
         }
         return Boolean.FALSE;
     }
@@ -139,10 +143,18 @@ public class TemplateEngine {
 
     private Result instantiate(String instancedString, ArrayList<Template> sortedTemplates, ArrayList<EntryMap.Entry> sortedEntries, String matchingMode){
         Integer templatesReplaced = 0;
+        Integer deleteCount = 0;
         Boolean replaceHappened;
         Template currentTemplate;
+        String delInstancedString;
+        ArrayList<Template> delSortedTemplates;
+        ArrayList<EntryMap.Entry> delSortedEntries;
         EntryMap.Entry currentEntry;
-        for (Integer i=0; i<sortedTemplates.size(); i++){
+        if(matchingMode.equals(MM_OPT)){
+          delInstancedString = instancedString;
+          delSortedTemplates = sortedTemplates;
+          delSortedEntries = sortedEntries;
+          for (Integer i=0; i<sortedTemplates.size(); i++){   //delete-unmatched
             currentTemplate = sortedTemplates.get(i);
             replaceHappened = Boolean.FALSE;
             for(Integer j=0; j<sortedEntries.size(); j++){
@@ -161,8 +173,53 @@ public class TemplateEngine {
                     instancedString = doReplace(instancedString, currentTemplate, i, "", sortedTemplates);
                 }
             }
+          }
+          for (Integer i=0; i<delSortedTemplates.size(); i++){   //delete-unmatched
+            currentTemplate = delSortedTemplates.get(i);
+            replaceHappened = Boolean.FALSE;
+            for(Integer j=0; j<delSortedEntries.size(); j++){
+                currentEntry = delSortedEntries.get(j);
+                if (isAMatch(currentTemplate, currentEntry)){
+                    delInstancedString = doReplace(delInstancedString, currentTemplate, i, currentEntry.getValue(), delSortedTemplates);
+                    replaceHappened = Boolean.TRUE;
+                    break;
+                }
+            }
+            if(replaceHappened){
+                deleteCount ++;
+            }
+            else{
+                delInstancedString = doReplace(delInstancedString, currentTemplate, i, "", delSortedTemplates);
+            }
+          }
+          if(deleteCount > templatesReplaced){
+            instancedString = delInstancedString;
+          }
+          return new Result(instancedString, templatesReplaced);
         }
-        return new Result(instancedString, templatesReplaced);
+        else{
+          for (Integer i=0; i<sortedTemplates.size(); i++){   //keep unmatched
+              currentTemplate = sortedTemplates.get(i);
+              replaceHappened = Boolean.FALSE;
+              for(Integer j=0; j<sortedEntries.size(); j++){
+                  currentEntry = sortedEntries.get(j);
+                  if (isAMatch(currentTemplate, currentEntry)){
+                      instancedString = doReplace(instancedString, currentTemplate, i, currentEntry.getValue(), sortedTemplates);
+                      replaceHappened = Boolean.TRUE;
+                      break;
+                  }
+              }
+              if(replaceHappened){
+                  templatesReplaced ++;
+              }
+              else{
+                  if(matchingMode.equals(MM_DELETE)){
+                      instancedString = doReplace(instancedString, currentTemplate, i, "", sortedTemplates);
+                  }
+              }
+          }
+          return new Result(instancedString, templatesReplaced);
+        }
     }
 
     private Boolean isAMatch(Template template, EntryMap.Entry entry){

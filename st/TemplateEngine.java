@@ -49,19 +49,11 @@ public class TemplateEngine {
     }
 
     private Boolean isMatchingModeValid(String matchingMode){
-        if (matchingMode == null){
-            return Boolean.FALSE;
-        }
-        if (matchingMode.equals(MM_KEEP)){
-            return Boolean.TRUE;
-        }
-        if (matchingMode.equals(MM_DELETE)){
-            return Boolean.TRUE;
-        }
-        if(matchingMode.equals(MM_OPT)){
-          return Boolean.TRUE;
-        }
-        return Boolean.FALSE;
+        return matchingMode != null && (
+            matchingMode.equals(MM_KEEP) ||
+            matchingMode.equals(MM_DELETE) ||
+            matchingMode.equals(MM_OPT)
+        );
     }
 
     private HashSet<Template> identifyTemplates(String templateString){
@@ -142,83 +134,88 @@ public class TemplateEngine {
     }
 
     private Result instantiate(String instancedString, ArrayList<Template> sortedTemplates, ArrayList<EntryMap.Entry> sortedEntries, String matchingMode){
-        Integer templatesReplaced = 0;
-        Integer deleteCount = 0;
+        int templatesReplaced = 0;
         Boolean replaceHappened;
         Template currentTemplate;
-        String delInstancedString;
-        ArrayList<Template> delSortedTemplates;
-        ArrayList<EntryMap.Entry> delSortedEntries;
         EntryMap.Entry currentEntry;
-        if(matchingMode.equals(MM_OPT)){
-          delInstancedString = instancedString;
-          delSortedTemplates = sortedTemplates;
-          delSortedEntries = sortedEntries;
-          for (Integer i=0; i<sortedTemplates.size(); i++){   //delete-unmatched
-            currentTemplate = sortedTemplates.get(i);
-            replaceHappened = Boolean.FALSE;
-            for(Integer j=0; j<sortedEntries.size(); j++){
-                currentEntry = sortedEntries.get(j);
-                if (isAMatch(currentTemplate, currentEntry)){
-                    instancedString = doReplace(instancedString, currentTemplate, i, currentEntry.getValue(), sortedTemplates);
-                    replaceHappened = Boolean.TRUE;
-                    break;
+
+        if (matchingMode.equals(MM_OPT)) {
+            String delInstancedString = instancedString;
+            int delTemplatesReplaced = 0;
+
+            // We need deep copies of the template and entry arrays
+            ArrayList<Template> delSortedTemplates = new ArrayList<Template>();
+            for (Template template : sortedTemplates) {
+                delSortedTemplates.add(new Template(template.getStartIndex(), template.getEndIndex(), template.getContent()));
+            }
+
+            ArrayList<EntryMap.Entry> delSortedEntries = new ArrayList<EntryMap.Entry>();
+            EntryMap delMap = new EntryMap();
+            for (EntryMap.Entry entry : sortedEntries) {
+                delSortedEntries.add(delMap.new Entry(entry.getPattern(), entry.getValue(), entry.getCaseSensitive()));
+            }
+
+
+            for (int i = 0; i < sortedTemplates.size(); i++){   //keep-unmatched
+                currentTemplate = sortedTemplates.get(i);
+
+                for(EntryMap.Entry entry : sortedEntries) {
+
+                    if (isAMatch(currentTemplate, entry)){
+                        instancedString = doReplace(instancedString, currentTemplate, i, entry.getValue(), sortedTemplates);
+                        templatesReplaced++;
+                        break;
+                    }
                 }
             }
-            if(replaceHappened){
-                templatesReplaced ++;
+
+            for (int i = 0; i < delSortedTemplates.size(); i++) {   //delete-unmatched
+                currentTemplate = delSortedTemplates.get(i);
+                replaceHappened = false;
+
+                for(EntryMap.Entry entry : delSortedEntries) {
+
+                    if (isAMatch(currentTemplate, entry)) {
+                        delInstancedString = doReplace(delInstancedString, currentTemplate, i, entry.getValue(), delSortedTemplates);
+                        replaceHappened = true;
+                        delTemplatesReplaced++;
+                        break;
+                    }
+                }
+
+                if (!replaceHappened) {
+                    delInstancedString = doReplace(delInstancedString, currentTemplate, i, "", delSortedTemplates);
+                }
             }
-            else{
-                if(matchingMode.equals(MM_DELETE)){
+
+            return delTemplatesReplaced > templatesReplaced
+                    ? new Result(delInstancedString, delTemplatesReplaced)
+                    : new Result(instancedString, templatesReplaced);
+
+
+        } else {
+            // Original modes
+            for (int i = 0; i < sortedTemplates.size(); i++) {   //keep unmatched
+                currentTemplate = sortedTemplates.get(i);
+                replaceHappened = false;
+
+                for (int j = 0; j < sortedEntries.size(); j++) {
+                    currentEntry = sortedEntries.get(j);
+                    if (isAMatch(currentTemplate, currentEntry)){
+                        instancedString = doReplace(instancedString, currentTemplate, i, currentEntry.getValue(), sortedTemplates);
+                        replaceHappened = true;
+                        break;
+                    }
+                }
+
+                if (replaceHappened) {
+                    templatesReplaced++;
+                } else if (matchingMode.equals(MM_DELETE)) {
                     instancedString = doReplace(instancedString, currentTemplate, i, "", sortedTemplates);
                 }
             }
-          }
-          for (Integer i=0; i<delSortedTemplates.size(); i++){   //delete-unmatched
-            currentTemplate = delSortedTemplates.get(i);
-            replaceHappened = Boolean.FALSE;
-            for(Integer j=0; j<delSortedEntries.size(); j++){
-                currentEntry = delSortedEntries.get(j);
-                if (isAMatch(currentTemplate, currentEntry)){
-                    delInstancedString = doReplace(delInstancedString, currentTemplate, i, currentEntry.getValue(), delSortedTemplates);
-                    replaceHappened = Boolean.TRUE;
-                    break;
-                }
-            }
-            if(replaceHappened){
-                deleteCount ++;
-            }
-            else{
-                delInstancedString = doReplace(delInstancedString, currentTemplate, i, "", delSortedTemplates);
-            }
-          }
-          if(deleteCount > templatesReplaced){
-            instancedString = delInstancedString;
-          }
-          return new Result(instancedString, templatesReplaced);
-        }
-        else{
-          for (Integer i=0; i<sortedTemplates.size(); i++){   //keep unmatched
-              currentTemplate = sortedTemplates.get(i);
-              replaceHappened = Boolean.FALSE;
-              for(Integer j=0; j<sortedEntries.size(); j++){
-                  currentEntry = sortedEntries.get(j);
-                  if (isAMatch(currentTemplate, currentEntry)){
-                      instancedString = doReplace(instancedString, currentTemplate, i, currentEntry.getValue(), sortedTemplates);
-                      replaceHappened = Boolean.TRUE;
-                      break;
-                  }
-              }
-              if(replaceHappened){
-                  templatesReplaced ++;
-              }
-              else{
-                  if(matchingMode.equals(MM_DELETE)){
-                      instancedString = doReplace(instancedString, currentTemplate, i, "", sortedTemplates);
-                  }
-              }
-          }
-          return new Result(instancedString, templatesReplaced);
+
+            return new Result(instancedString, templatesReplaced);
         }
     }
 
